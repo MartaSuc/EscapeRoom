@@ -9,7 +9,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class ESCAPEROOM1_API UGameInfo : public UActorComponent
+class ESCAPEROOM_API UGameInfo : public UActorComponent
 {
 	GENERATED_BODY()
 
