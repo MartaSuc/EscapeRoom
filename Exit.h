@@ -34,4 +34,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume* ExitDoorTrig = nullptr;
+		
+	AActor* OneThatOpens = nullptr;
 };
