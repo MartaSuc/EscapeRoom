@@ -12,11 +12,14 @@ UExit::UExit()
 void UExit::BeginPlay()
 {
 	Super::BeginPlay();
+
 	FindTrigger();
 
 	CurrentLocation = GetOwner()->GetActorLocation();
 	OpenLocation = CloseLocation = CurrentLocation;
-	OpenLocation += {.0f, .0f, 310.0f};				//setting open location to {-830, -3990, 503}
+	OpenLocation += {.0f, .0f, 250.0f};				//setting open location
+
+	OneThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 void UExit::FindTrigger()
@@ -57,7 +60,7 @@ void UExit::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentT
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (ExitDoorTrig && MassOfActorsOnTrigger(ExitDoorTrig) >= 80.f)		//weight of 4 boxes from TrapRoom
+	if (ExitDoorTrig && (MassOfActorsOnTrigger(ExitDoorTrig) >= 80.f || ExitDoorTrig->IsOverlappingActor(OneThatOpens)))		//weight of 4 boxes from TrapRoom
 		OpeningDoor(DeltaTime);
 	else ClosingDoor(DeltaTime);
 }
