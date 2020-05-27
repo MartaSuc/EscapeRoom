@@ -1,18 +1,21 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/TriggerVolume.h"
-#include "GlassDoor.generated.h"
+#include "Door.generated.h"
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class ESCAPEROOM_API UGlassDoor : public UActorComponent
+class ESCAPEROOM_API UDoor : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UGlassDoor();
+	UDoor();
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -20,7 +23,7 @@ public:
 	void OpeningDoor(float DeltaTime);
 	void ClosingDoor();
 	void BottlePlatformTrigAppear();
-	void GlassDoorTrigAppear();
+	void DoorTrigAppear();
 	float MassOfActorsOnTrigger(ATriggerVolume* Trigger);
 
 protected:
@@ -28,19 +31,20 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	FRotator CurrentRotation = { 0.f, 0.f, 0.f };
-	FRotator OpenRotation = { 0.f, 0.f, 0.f };
-	FRotator CloseRotation = { 0.f, 0.f, 0.f };
-	FRotator Door = { 0.f, 0.f, 0.f };
+	FVector CurrentLocation = { 0.f, 0.f, 0.f };
+	FVector OpenLocation = { 0.f, 0.f, 0.f };
+	FVector CloseLocation = { 0.f, 0.f, 0.f };
+	FVector Door = { 0.f, 0.f, 0.f };
 	bool bGeneratorTrigNotUsed = true;
+	float TargetX = -11.f;
 
 	UPROPERTY(EditAnywhere)
-		float Target = 90.f;
+		float TargetY = 100.f;
 
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume* GeneratorTrig = nullptr;
 	UPROPERTY(EditAnywhere)
-		ATriggerVolume* GlassDoorTrig = nullptr;
+		ATriggerVolume* DoorTrig = nullptr;
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume* TrapRoomTrig1 = nullptr;
 	UPROPERTY(EditAnywhere)
@@ -52,4 +56,5 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume* BottlesPlatformTrig = nullptr;
+		
 };
