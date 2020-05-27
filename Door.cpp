@@ -1,4 +1,7 @@
-#include "GlassDoor.h"
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Door.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -6,7 +9,7 @@
 #define OUT
 
 // Sets default values for this component's properties
-UGlassDoor::UGlassDoor()
+UDoor::UDoor()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -14,20 +17,23 @@ UGlassDoor::UGlassDoor()
 }
 
 // Called when the game starts
-void UGlassDoor::BeginPlay()
+void UDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	FindTriggers();
 
-	CurrentRotation = GetOwner()->GetActorRotation();
-	OpenRotation = CloseRotation = CurrentRotation;
-	CloseRotation.Add(.0f, Target, .0f);	
+	CurrentLocation = GetOwner()->GetActorLocation();
+	OpenLocation = CloseLocation = CurrentLocation;
+	OpenLocation += {TargetX, TargetY, .0f};
+
+	OpeningDoor(2.f);			//delta time set to 1.f
 }
 
-void UGlassDoor::FindTriggers()
+void UDoor::FindTriggers()
 {
 	if (!GeneratorTrig) UE_LOG(LogTemp, Error, TEXT("%s has no GeneratorTrig set"), *GetOwner()->GetName());
-	if (!GlassDoorTrig) UE_LOG(LogTemp, Error, TEXT("%s has no GlassDoorTrig set"), *GetOwner()->GetName());
+	if (!DoorTrig) UE_LOG(LogTemp, Error, TEXT("%s has no GlassDoorTrig set"), *GetOwner()->GetName());
 	if (!TrapRoomTrig1) UE_LOG(LogTemp, Error, TEXT("%s has no TrapRoomTrig1 set"), *GetOwner()->GetName());
 	if (!TrapRoomTrig2) UE_LOG(LogTemp, Error, TEXT("%s has no TrapRoomTrig2 set"), *GetOwner()->GetName());
 	if (!TrapRoomTrig3) UE_LOG(LogTemp, Error, TEXT("%s has no TrapRoomTrig3 set"), *GetOwner()->GetName());
@@ -35,32 +41,32 @@ void UGlassDoor::FindTriggers()
 	if (!BottlesPlatformTrig) UE_LOG(LogTemp, Error, TEXT("%s has no BottlesPlatformTrig set"), *GetOwner()->GetName());
 }
 
-void UGlassDoor::OpeningDoor(float DeltaTime)
+void UDoor::OpeningDoor(float DeltaTime)
 {
-	CurrentRotation = GetOwner()->GetActorRotation();
-	Door = FMath::Lerp(CurrentRotation, OpenRotation, DeltaTime * 0.6f);
-	GetOwner()->SetActorRotation(Door);	
+	CurrentLocation = GetOwner()->GetActorLocation();
+	Door = FMath::Lerp(CurrentLocation, OpenLocation, DeltaTime * 0.6f);
+	GetOwner()->SetActorLocation(Door);
 }
 
-void UGlassDoor::ClosingDoor()
+void UDoor::ClosingDoor()
 {
-	GetOwner()->SetActorRotation(CloseRotation);
+	GetOwner()->SetActorLocation(CloseLocation);
 }
 
-void UGlassDoor::BottlePlatformTrigAppear()
+void UDoor::BottlePlatformTrigAppear()
 {
-	if(BottlesPlatformTrig)
-		BottlesPlatformTrig->SetActorLocation(FVector(-2757.0f, -3389.0f, 336.0f));		//hard-coding location of BottlePlatform trigger
+	if (BottlesPlatformTrig)
+		BottlesPlatformTrig->SetActorLocation(FVector(-495.0f, -920.0f, 255.0f));		//hard-coding location of BottlePlatformTrigger
 	bGeneratorTrigNotUsed = false;													//setting bool to false to make sure GeneratorTrig can be used only once
 }
 
-void UGlassDoor::GlassDoorTrigAppear()
+void UDoor::DoorTrigAppear()
 {
-	if (GlassDoorTrig)
-		GlassDoorTrig->SetActorLocation(FVector(-1266.0f, -3615.0f, 479.0f));	//hard-coding location of GlassDoor trigger
+	if (DoorTrig)
+		DoorTrig->SetActorLocation(FVector(510.0f, -1275.0f, 250.0f));	//hard-coding location of DoorTrigger
 }
 
-float UGlassDoor::MassOfActorsOnTrigger(ATriggerVolume* Trigger)
+float UDoor::MassOfActorsOnTrigger(ATriggerVolume* Trigger)
 {
 	float TotalMass = 0.0f;
 	TArray <AActor*> ActorsOverlaping;
@@ -74,20 +80,21 @@ float UGlassDoor::MassOfActorsOnTrigger(ATriggerVolume* Trigger)
 	return TotalMass;
 }
 
+
 // Called every frame
-void UGlassDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//GeneratorTrigger
-	if (GeneratorTrig && bGeneratorTrigNotUsed && MassOfActorsOnTrigger(GeneratorTrig) >= 600.f)	//one energy core's weight is set to 300kg
+	if (GeneratorTrig && bGeneratorTrigNotUsed && MassOfActorsOnTrigger(GeneratorTrig) >= 600.f)	//one generator's weight is set to 300kg
 	{
 		ClosingDoor();
-		GlassDoorTrigAppear();
+		DoorTrigAppear();
 	}
 
 	//GlassDoorTrigger
-	if (GlassDoorTrig && MassOfActorsOnTrigger(GlassDoorTrig) >= 50.f)		//pawn's (player's) weight is set to 60kg
+	if (DoorTrig && MassOfActorsOnTrigger(DoorTrig) >= 50.f)		//pawn's (player's) weight is set to 60kg
 	{
 		OpeningDoor(DeltaTime);
 		BottlePlatformTrigAppear();
